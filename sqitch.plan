@@ -1,6 +1,6 @@
 %syntax-version=1.0.0
 %project=ciip_2018
-%uri=https://github.com/bcgov/cas-ggircs
+%uri=https://github.com/bcgov/cas-ggircs-ciip-2018/
 
 ciip/schema 2019-06-24T22:54:49Z Matthieu Foucault <matthieu@button.is> # Add a schema for ciip
 ciip/table/application [ciip/schema] 2019-06-25T00:00:28Z Matthieu Foucault <matthieu@button.is> # Add a table for ciip applications
