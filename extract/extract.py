@@ -46,7 +46,7 @@ cur = conn.cursor()
 directories = args.dirslist.read().split('\n')
 
 try:
-    cur.execute('select ggircs_transform.clone_schema("ciip_2018", "ciip_2018_load", false);')
+    cur.execute("select ggircs_transform.clone_schema('ciip_2018', 'ciip_2018_load', false);")
     for directory in directories:
         if directory.strip() == '':
             continue

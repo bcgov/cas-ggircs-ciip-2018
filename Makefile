@@ -162,3 +162,22 @@ deploy_dev_schema: OC_PROJECT=${OC_DEV_PROJECT}
 deploy_dev_schema:
 	$(call switch_project)
 	$(call deploy_schema)
+
+define deploy_extract
+	$(call oc_process,persistentvolumeclaim/cas-ggircs-ciip-2018-data)
+	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract-mirror)
+	$(call oc_promote,cas-ggircs-ciip-2018-extract,${GIT_BRANCH_NORM})
+	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
+endef
+
+.PHONY: deploy_test_extract
+deploy_test_extract: OC_PROJECT=${OC_TEST_PROJECT}
+deploy_test_extract:
+	$(call switch_project)
+	$(call deploy_extract)
+
+.PHONY: deploy_dev_extract
+deploy_dev_extract: OC_PROJECT=${OC_DEV_PROJECT}
+deploy_dev_extract:
+	$(call switch_project)
+	$(call deploy_schema)

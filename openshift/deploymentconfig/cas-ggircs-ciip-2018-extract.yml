@@ -32,24 +32,24 @@ objects:
   metadata:
     annotations:
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: cas-ciip-extract
+    name: cas-ggircs-ciip-2018-extract
   spec:
     replicas: 1
     selector:
-      name: cas-ciip-extract
+      name: cas-ggircs-ciip-2018-extract
     strategy:
       type: Recreate
     template:
       metadata:
         labels:
-          name: cas-ciip-extract
+          name: cas-ggircs-ciip-2018-extract
       spec:
         containers:
         - capabilities: {}
           <<: *envDefaults
-          image: cas-ciip-extract-mirror:${GIT_BRANCH_NORM}
+          image: cas-ggircs-ciip-2018-extract-mirror:${GIT_BRANCH_NORM}
           imagePullPolicy: IfNotPresent
-          name: cas-ciip-extract
+          name: cas-ggircs-ciip-2018-extract
           resources:
             limits:
               cpu: 500m
@@ -63,15 +63,15 @@ objects:
           terminationMessagePath: /dev/termination-log
           volumeMounts:
           - mountPath: /opt/app-root/src/data
-            name: cas-ciip-data
+            name: cas-ggircs-ciip-2018-data
           - mountPath: /opt/configs
             name: ciip-extract-dirlist
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         volumes:
-        - name: cas-ciip-data
+        - name: cas-ggircs-ciip-2018-data
           persistentVolumeClaim:
-            claimName: cas-ciip-data
+            claimName: cas-ggircs-ciip-2018-data
         - configMap:
             defaultMode: 420
             name: ciip-extract-dirlist
@@ -80,10 +80,10 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - cas-ciip-extract
+        - cas-ggircs-ciip-2018-extract
         from:
           kind: ImageStreamTag
-          name: cas-ciip-extract-mirror:${GIT_BRANCH_NORM}
+          name: cas-ggircs-ciip-2018-extract-mirror:${GIT_BRANCH_NORM}
         lastTriggeredImage: ""
       type: ImageChange
     - type: ConfigChange

@@ -5,7 +5,7 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: cas-ciip-data
+    name: cas-ggircs-ciip-2018-data
   spec:
     storageClassName: gluster-file
     accessModes:
