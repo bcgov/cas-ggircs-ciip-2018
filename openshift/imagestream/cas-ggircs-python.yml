@@ -12,11 +12,11 @@ objects:
     tags:
     - from:
         kind: DockerImage
-        name: ${PYTHON_IMAGE}:${PYTHON_VERSION}
-      name: ${PYTHON_VERSION}
+        name: ${PYTHON_IMAGE}:${PYTHON_TAG}
+      name: ${PYTHON_TAG}
     - from:
         kind: DockerImage
-        name: ${PYTHON_IMAGE}:${PYTHON_VERSION}
+        name: ${PYTHON_IMAGE}:${PYTHON_TAG}
       name: latest
   status: {}
 
@@ -26,11 +26,11 @@ parameters:
   displayName: Name of Python Image
   name: PYTHON_IMAGE
   required: true
-  value: "registry.access.redhat.com/rhscl/python-36-rhel7"
+  value: registry.redhat.io/ubi8/python-36
 
 - description: Version of Python image to be used.
   displayName: Version of Python Image
-  name: PYTHON_VERSION
+  name: PYTHON_TAG
   required: true
-  value: latest
+  value: 1-37
 
