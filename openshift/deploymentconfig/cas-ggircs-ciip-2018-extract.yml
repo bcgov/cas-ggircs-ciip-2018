@@ -52,7 +52,7 @@ objects:
           name: cas-ciip-extract
           resources:
             limits:
-              cpu: 1000m
+              cpu: 500m
               memory: 128Mi
             requests:
               cpu: 100m

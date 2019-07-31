@@ -53,7 +53,8 @@ try:
         for filename in os.listdir(directory):
             print('parsing: ' + filename)
             extract_book(os.path.join(directory,filename), cur)
-    cur.execute('drop schema')
+    cur.execute('drop schema ciip_2018 cascade;')
+    cur.execute('alter schema ciip_2018_load rename ciip_2018;')
     conn.commit()
 except Exception as e:
     conn.rollback()

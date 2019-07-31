@@ -132,11 +132,17 @@ define build
 	$(call oc_process,buildconfig/cas-ggircs-ciip-2018-schema,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
 endef
 
-define deploy
-	$(call oc_process,imagestream/cas-ciip-extract-mirror)
-	$(call oc_promote,cas-ciip-extract,${GIT_BRANCH_NORM})
-	$(call oc_process,persistentvolumeclaim/cas-ciip-data,)
-	$(call oc_process,deploymentconfig/cas-ciip-extract,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
+define deploy_extract
+	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract-mirror)
+	$(call oc_promote,cas-ggircs-ciip-2018-extract,${GIT_BRANCH_NORM})
+	$(call oc_process,persistentvolumeclaim/cas-ggircs-ciip-2018-data,)
+	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
+endef
+
+define deploy_schema
+	$(call oc_process,imagestream/cas-ggircs-ciip-2018-schema-mirror)
+	$(call oc_promote,cas-ggircs-ciip-2018-schema,${GIT_BRANCH_NORM})
+	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-schema,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
 endef
 
 .PHONY: deploy_tools
@@ -145,14 +151,14 @@ deploy_tools:
 	$(call switch_project)
 	$(call build)
 
-.PHONY: deploy_test
-deploy_test_ciip: OC_PROJECT=${OC_TEST_PROJECT}
-deploy_test_ciip:
+.PHONY: deploy_test_schema
+deploy_test_schema: OC_PROJECT=${OC_TEST_PROJECT}
+deploy_test_schema:
 	$(call switch_project)
-	$(call deploy_ciip)
+	$(call deploy_schema)
 
-.PHONY: deploy_dev
-deploy_dev_ciip: OC_PROJECT=${OC_DEV_PROJECT}
-deploy_dev_ciip:
+.PHONY: deploy_dev_schema
+deploy_dev_schema: OC_PROJECT=${OC_DEV_PROJECT}
+deploy_dev_schema:
 	$(call switch_project)
-	$(call deploy_ciip)
+	$(call deploy_schema)

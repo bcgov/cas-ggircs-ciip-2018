@@ -5,7 +5,7 @@ objects:
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
-    name: cas-ciip-extract-mirror
+    name: cas-ggircs-ciip-2018-extract-mirror
   spec:
     lookupPolicy:
       local: true
