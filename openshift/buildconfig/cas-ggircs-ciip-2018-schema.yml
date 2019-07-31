@@ -31,10 +31,10 @@ objects:
       type: Source
     triggers:
     - github:
-        secret: cas-ggircs-github-trigger
+        secret: cas-ggircs-ciip-2018-schema-github-trigger
       type: GitHub
     - generic:
-        secret: cas-ggircs-generic-trigger
+        secret: cas-ggircs-ciip-2018-schema-generic-trigger
       type: Generic
     - type: ConfigChange
     - imageChange:
