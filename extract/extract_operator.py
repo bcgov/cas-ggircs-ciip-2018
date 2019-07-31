@@ -47,7 +47,7 @@ def extract(ciip_book, cursor, application_id):
             operator['swrs_operator_id'] = res[0]
 
     cursor.execute(
-        ('insert into ciip_2018.operator '
+        ('insert into ciip_2018_load.operator '
         '(application_id, business_legal_name, english_trade_name, bc_corp_reg_number, '
         'is_bc_cop_reg_number_valid, orgbook_legal_name, is_registration_active, duns, swrs_operator_id) '
         'values (%s, %s, %s, %s, %s, %s, %s, %s, %s) '

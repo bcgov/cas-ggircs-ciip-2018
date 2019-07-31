@@ -19,7 +19,7 @@ def extract(ciip_book, cursor, book_path):
     signature_date = dateutil.parser.parse(signature_date) if isinstance(signature_date, str) else None
     application_type = 'SFO' if 'Production' in ciip_book.sheet_names() else 'LFO'
     cursor.execute(
-        ('insert into ciip_2018.application '
+        ('insert into ciip_2018_load.application '
         '(source_file_name, source_sha1, imported_at, application_year, application_type, signature_date) '
         'values (%s, %s, %s, %s, %s, %s) '
         'returning id'),

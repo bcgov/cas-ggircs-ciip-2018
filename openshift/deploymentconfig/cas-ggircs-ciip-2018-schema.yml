@@ -5,6 +5,8 @@ labels:
 
 envDefaults: &envDefaults
   env:
+    - name: SQITCH_TARGET
+      value: "db:pg:"
     - name: PGUSER
       valueFrom:
         secretKeyRef:
@@ -20,10 +22,14 @@ envDefaults: &envDefaults
         secretKeyRef:
           key: database-name
           name: cas-ggircs-postgres
+    - name: PGPORT
+      value: "5432"
     - name: PGHOST
       value: cas-ggircs-postgres
-    - name: APP_SCRIPT
-      value: "run-extract.sh"
+    - name: SQITCH_FULLNAME
+      value: OpenShift Deployer
+    - name: SQITCH_EMAIL
+      value: deployer@pathfinder.gov.bc.ca
 
 objects:
 
@@ -32,28 +38,52 @@ objects:
   metadata:
     annotations:
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: cas-ciip-extract
+    name: cas-ggircs-ciip-2018-schema
   spec:
     replicas: 1
     selector:
-      name: cas-ciip-extract
+      name: cas-ggircs-ciip-2018-schema
     strategy:
       type: Recreate
+      recreateParams:
+        pre:
+          failurePolicy: Retry
+          execNewPod:
+            <<: *envDefaults
+            containerName: cas-ggircs-ciip-2018-schema
+            command:
+              - /usr/bin/env
+              - bash
+              - -c
+              - |
+                sqitch revert @v1.0.0 -y;
+        post:
+          failurePolicy: Retry
+          execNewPod:
+            <<: *envDefaults
+            containerName: cas-ggircs-ciip-2018-schema
+            command:
+              - /usr/bin/env
+              - bash
+              - -c
+              - |
+                set -euo pipefail;
+                sqitch deploy;
     template:
       metadata:
         labels:
-          name: cas-ciip-extract
+          name: cas-ggircs-ciip-2018-schema
       spec:
         containers:
         - capabilities: {}
           <<: *envDefaults
-          image: cas-ciip-extract-mirror:${GIT_BRANCH_NORM}
+          image: cas-ggircs-ciip-2018-schema-mirror:${GIT_BRANCH_NORM}
           imagePullPolicy: IfNotPresent
-          name: cas-ciip-extract
+          name: cas-ggircs-ciip-2018-schema
           resources:
             limits:
-              cpu: 1000m
-              memory: 128Mi
+              cpu: 100m
+              memory: 64Mi
             requests:
               cpu: 100m
               memory: 64Mi
@@ -61,29 +91,16 @@ objects:
             capabilities: {}
             privileged: false
           terminationMessagePath: /dev/termination-log
-          volumeMounts:
-          - mountPath: /opt/app-root/src/data
-            name: cas-ciip-data
-          - mountPath: /opt/configs
-            name: ciip-extract-dirlist
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-        volumes:
-        - name: cas-ciip-data
-          persistentVolumeClaim:
-            claimName: cas-ciip-data
-        - configMap:
-            defaultMode: 420
-            name: ciip-extract-dirlist
-          name: ciip-extract-dirlist
     triggers:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - cas-ciip-extract
+        - cas-ggircs-ciip-2018-schema
         from:
           kind: ImageStreamTag
-          name: cas-ciip-extract-mirror:${GIT_BRANCH_NORM}
+          name: cas-ggircs-ciip-2018-schema-mirror:${GIT_BRANCH_NORM}
         lastTriggeredImage: ""
       type: ImageChange
     - type: ConfigChange

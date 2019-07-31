@@ -46,13 +46,14 @@ cur = conn.cursor()
 directories = args.dirslist.read().split('\n')
 
 try:
-    cur.execute('truncate table ciip_2018.application cascade;')
+    cur.execute('select ggircs_transform.clone_schema("ciip_2018", "ciip_2018_load", false);')
     for directory in directories:
         if directory.strip() == '':
             continue
         for filename in os.listdir(directory):
             print('parsing: ' + filename)
             extract_book(os.path.join(directory,filename), cur)
+    cur.execute('drop schema')
     conn.commit()
 except Exception as e:
     conn.rollback()

@@ -125,10 +125,11 @@ endef
 
 define build
 	@@echo Add all image streams and build in the tools project...
-	$(call oc_process,imagestream/cas-ggircs-perl,)
 	$(call oc_process,imagestream/cas-ggircs-python,)
-	$(call oc_process,imagestream/cas-ciip-extract,)
-	$(call oc_process,buildconfig/cas-ciip-extract,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
+	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract,)
+	$(call oc_process,imagestream/cas-ggircs-ciip-2018-schema,)
+	$(call oc_process,buildconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
+	$(call oc_process,buildconfig/cas-ggircs-ciip-2018-schema,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
 endef
 
 define deploy
@@ -146,12 +147,12 @@ deploy_tools:
 
 .PHONY: deploy_test
 deploy_test_ciip: OC_PROJECT=${OC_TEST_PROJECT}
-deploy_test_ciip: deploy_tools
+deploy_test_ciip:
 	$(call switch_project)
 	$(call deploy_ciip)
 
 .PHONY: deploy_dev
 deploy_dev_ciip: OC_PROJECT=${OC_DEV_PROJECT}
-deploy_dev_ciip: deploy_tools
+deploy_dev_ciip:
 	$(call switch_project)
 	$(call deploy_ciip)

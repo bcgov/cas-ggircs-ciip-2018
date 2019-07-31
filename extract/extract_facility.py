@@ -46,7 +46,7 @@ def extract(ciip_book, cursor, application_id, operator):
 
     cursor.execute(
         ('''
-        insert into ciip_2018.facility
+        insert into ciip_2018_load.facility
         (
             application_id, operator_id, facility_name, facility_type,
             bc_ghg_id, facility_description, naics, swrs_facility_id,

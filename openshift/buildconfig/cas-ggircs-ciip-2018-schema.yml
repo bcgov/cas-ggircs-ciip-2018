@@ -5,16 +5,16 @@ objects:
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
-    name: cas-ciip-extract
+    name: cas-ggircs-ciip-2018-schema
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: cas-ciip-extract:${GIT_BRANCH_NORM}
+        name: cas-ggircs:${GIT_BRANCH_NORM}
     resources:
       limits:
         cpu: "1"
-        memory: 2Gi
+        memory: 1Gi
       requests:
         cpu: 100m
         memory: 256Mi
@@ -22,13 +22,12 @@ objects:
       git:
         ref: ${GIT_BRANCH}
         uri: https://github.com/bcgov/cas-ggircs-ciip-2018.git
-      contextDir: ciip/extract
       type: Git
     strategy:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: cas-ggircs-python:${PYTHON_VERSION}
+          name: cas-ggircs-perl:${PERL_VERSION}
       type: Source
     triggers:
     - github:
@@ -43,11 +42,11 @@ objects:
 
 parameters:
 
-- description: Version of Python image to be used (latest for now).
-  displayName: Version of Python Image
-  name: PYTHON_VERSION
+- description: Version of Perl image to be used (latest for now).
+  displayName: Version of Perl Image
+  name: PERL_VERSION
   required: true
-  value: latest
+  value: "latest"
 - description: Git source code branch currently deployed.
   displayName: Git branch
   name: GIT_BRANCH

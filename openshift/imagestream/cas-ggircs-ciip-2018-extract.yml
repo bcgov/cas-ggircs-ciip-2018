@@ -5,4 +5,4 @@ objects:
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
-    name: cas-ciip-extract
+    name: cas-ggircs-ciip-2018-extract
