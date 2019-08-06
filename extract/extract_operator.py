@@ -49,7 +49,7 @@ def extract(ciip_book, cursor, application_id):
     cursor.execute(
         ('insert into ciip_2018_load.operator '
         '(application_id, business_legal_name, english_trade_name, bc_corp_reg_number, '
-        'is_bc_cop_reg_number_valid, orgbook_legal_name, is_registration_active, duns, swrs_operator_id) '
+        'is_bc_corp_reg_number_valid, orgbook_legal_name, is_registration_active, duns, swrs_operator_id) '
         'values (%s, %s, %s, %s, %s, %s, %s, %s, %s) '
         'returning id'),
         (application_id, operator['legal_name'], operator['trade_name'], operator['bc_corp_reg'],
