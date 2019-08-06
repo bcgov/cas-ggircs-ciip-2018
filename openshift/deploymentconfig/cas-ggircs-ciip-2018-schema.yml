@@ -1,0 +1,113 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: deploy-template
+
+envDefaults: &envDefaults
+  env:
+    - name: SQITCH_TARGET
+      value: "db:pg:"
+    - name: PGUSER
+      valueFrom:
+        secretKeyRef:
+          key: database-user
+          name: cas-ggircs-postgres
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: database-password
+          name: cas-ggircs-postgres
+    - name: PGDATABASE
+      valueFrom:
+        secretKeyRef:
+          key: database-name
+          name: cas-ggircs-postgres
+    - name: PGPORT
+      value: "5432"
+    - name: PGHOST
+      value: cas-ggircs-postgres
+    - name: SQITCH_FULLNAME
+      value: OpenShift Deployer
+    - name: SQITCH_EMAIL
+      value: deployer@pathfinder.gov.bc.ca
+
+objects:
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: cas-ggircs-ciip-2018-schema
+  spec:
+    replicas: 1
+    selector:
+      name: cas-ggircs-ciip-2018-schema
+    strategy:
+      type: Recreate
+      recreateParams:
+        pre:
+          failurePolicy: Retry
+          execNewPod:
+            <<: *envDefaults
+            containerName: cas-ggircs-ciip-2018-schema
+            command:
+              - /usr/bin/env
+              - bash
+              - -c
+              - |
+                sqitch revert @v1.0.0 -y;
+        post:
+          failurePolicy: Retry
+          execNewPod:
+            <<: *envDefaults
+            containerName: cas-ggircs-ciip-2018-schema
+            command:
+              - /usr/bin/env
+              - bash
+              - -c
+              - |
+                set -euo pipefail;
+                sqitch deploy;
+    template:
+      metadata:
+        labels:
+          name: cas-ggircs-ciip-2018-schema
+      spec:
+        containers:
+        - capabilities: {}
+          <<: *envDefaults
+          image: cas-ggircs-ciip-2018-schema-mirror:${GIT_BRANCH_NORM}
+          imagePullPolicy: IfNotPresent
+          name: cas-ggircs-ciip-2018-schema
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - cas-ggircs-ciip-2018-schema
+        from:
+          kind: ImageStreamTag
+          name: cas-ggircs-ciip-2018-schema-mirror:${GIT_BRANCH_NORM}
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+  status: {}
+
+parameters:
+- description: Git source code branch currently deployed, where slashes are replaced by dashes, to be able to use it in image tags.
+  displayName: Git branch (normalized)
+  name: GIT_BRANCH_NORM
+  required: true
