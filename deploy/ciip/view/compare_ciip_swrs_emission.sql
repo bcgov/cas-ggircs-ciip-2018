@@ -5,13 +5,17 @@
 begin;
 
 create or replace view ciip_2018.compare_ciip_swrs_emission as
-    with ciip_data as (select application.application_type, application.source_file_name, operator.business_legal_name, operator.swrs_operator_id,
-       facility.facility_name, facility.swrs_facility_id,
-       emission.emission_category, emission.gas_type, emission.quantity, emission.calculated_quantity
+    with ciip_data as (
+        select application.application_type, operator.business_legal_name,
+               facility.swrs_facility_id, emission.emission_category, emission.gas_type,
+               sum(emission.quantity) as quantity, sum(emission.calculated_quantity) as calculated_quantity
     from ciip_2018.emission
     join ciip_2018.facility on emission.facility_id = facility.id
     join ciip_2018.operator on emission.operator_id = operator.id
-    join ciip_2018.application on facility.application_id = application.id),
+    join ciip_2018.application on facility.application_id = application.id
+    group by application.application_type, operator.business_legal_name,
+             facility.swrs_facility_id, emission.emission_category,
+             emission.gas_type),
 
     swrs_data as (
         select facility.swrs_facility_id, emission.emission_category, emission.gas_type, sum(emission.quantity) as quantity,
@@ -33,11 +37,9 @@ create or replace view ciip_2018.compare_ciip_swrs_emission as
         where emission.emission_category = 'BC_ScheduleB_WasteEmissions' or emission.emission_category = 'BC_ScheduleB_WastewaterEmissions'
         group by facility.swrs_facility_id, emission.gas_type
     )
-    select ciip_data.application_type, ciip_data.source_file_name, ciip_data.business_legal_name, ciip_data.facility_name,
-           ciip_data.swrs_operator_id, ciip_data.swrs_facility_id,
+    select ciip_data.application_type, ciip_data.business_legal_name, ciip_data.swrs_facility_id,
            ciip_data.emission_category, ciip_data.gas_type,
-           case
-           when
+           case           when
               swrs_data.quantity = 0 or
               (ciip_data.quantity IS NULL and swrs_data.quantity IS NOT NULL) or
               (ciip_data.quantity IS NOT NULL and swrs_data.quantity IS NULL)
