@@ -1,0 +1,37 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+
+
+parameters:
+- description: Name of Python image to be used.
+  displayName: Name of Python Image
+  name: PYTHON_IMAGE
+  required: true
+  value: registry.redhat.io/ubi8/python-36
+- description: Version of Python image to be used.
+  displayName: Version of Python Image
+  name: PYTHON_TAG
+  required: true
+  value: 1-37
+- description: Prefix to prepend to object name.
+  displayName: Prefix
+  name: PREFIX
+  required: true
+
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${PREFIX}python
+  spec:
+    lookupPolicy:
+      local: true
+    tags:
+    - from:
+        kind: DockerImage
+        name: ${PYTHON_IMAGE}:${PYTHON_TAG}
+      name: ${PYTHON_TAG}
+    - from:
+        kind: DockerImage
+        name: ${PYTHON_IMAGE}:${PYTHON_TAG}
+      name: latest
