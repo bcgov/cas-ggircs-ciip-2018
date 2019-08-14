@@ -104,84 +104,6 @@ postinstall_check:
 	@@printf '%s\n%s\n' "${SQITCH_MIN_VERSION}" "${SQITCH_VERSION}" | sort -CV ||\
  	(echo "FATAL: ${SQITCH} version should be at least ${SQITCH_MIN_VERSION}. Make sure the ${SQITCH} executable installed by cpanminus is available has the highest priority in the PATH" && exit 1);
 
-.PHONY: install
-install: install_cpanm install_cpandeps postinstall_check
-
-define switch_project
-	@@echo ✓ logged in as: $(shell ${OC} whoami)
-	@@${OC} project ${OC_PROJECT} >/dev/null
-	@@echo ✓ switched project to: ${OC_PROJECT}
-endef
-
-define oc_process
-	@@${OC} process -f openshift/${1}.yml ${2} | ${OC} apply --wait=true --overwrite=true -f-
-endef
-
-define oc_promote
-	@@$(OC) tag $(OC_TOOLS_PROJECT)/$(1):$(2) $(1)-mirror:$(2) --reference-policy=local
-endef
-
-define build
-	@@echo Add all image streams and build in the tools project...
-	$(call oc_process,imagestream/cas-ggircs-python,)
-	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract,)
-	$(call oc_process,imagestream/cas-ggircs-ciip-2018-schema,)
-	$(call oc_process,buildconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
-	$(call oc_process,buildconfig/cas-ggircs-ciip-2018-schema,GIT_BRANCH=${GIT_BRANCH} GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
-endef
-
-define deploy_extract
-	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract-mirror)
-	$(call oc_promote,cas-ggircs-ciip-2018-extract,${GIT_BRANCH_NORM})
-	$(call oc_process,persistentvolumeclaim/cas-ggircs-ciip-2018-data,)
-	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
-endef
-
-define deploy_schema
-	$(call oc_process,imagestream/cas-ggircs-ciip-2018-schema-mirror)
-	$(call oc_promote,cas-ggircs-ciip-2018-schema,${GIT_BRANCH_NORM})
-	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-schema,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
-endef
-
-.PHONY: deploy_tools
-deploy_tools: OC_PROJECT=${OC_TOOLS_PROJECT}
-deploy_tools:
-	$(call switch_project)
-	$(call build)
-
-.PHONY: deploy_test_schema
-deploy_test_schema: OC_PROJECT=${OC_TEST_PROJECT}
-deploy_test_schema:
-	$(call switch_project)
-	$(call deploy_schema)
-
-.PHONY: deploy_dev_schema
-deploy_dev_schema: OC_PROJECT=${OC_DEV_PROJECT}
-deploy_dev_schema:
-	$(call switch_project)
-	$(call deploy_schema)
-
-define deploy_extract
-	$(call oc_process,persistentvolumeclaim/cas-ggircs-ciip-2018-data)
-	$(call oc_process,imagestream/cas-ggircs-ciip-2018-extract-mirror)
-	$(call oc_promote,cas-ggircs-ciip-2018-extract,${GIT_BRANCH_NORM})
-	$(call oc_process,deploymentconfig/cas-ggircs-ciip-2018-extract,GIT_BRANCH_NORM=${GIT_BRANCH_NORM})
-endef
-
-.PHONY: deploy_test_extract
-deploy_test_extract: OC_PROJECT=${OC_TEST_PROJECT}
-deploy_test_extract:
-	$(call switch_project)
-	$(call deploy_extract)
-
-.PHONY: deploy_dev_extract
-deploy_dev_extract: OC_PROJECT=${OC_DEV_PROJECT}
-deploy_dev_extract:
-	$(call switch_project)
-	$(call deploy_schema)
-
-
-
 .PHONY: help
 help: $(call make_help,help,Explains how to use this Makefile)
 	@@exit 0
@@ -215,9 +137,10 @@ configure: whoami
 build: $(call make_help,build,Builds the source into an image in the tools project namespace)
 build: OC_PROJECT=$(OC_TOOLS_PROJECT)
 build: whoami
-	$(call oc_build,$(PROJECT_PREFIX)metabase-build)
-	$(call oc_build,$(PROJECT_PREFIX)metabase)
+	$(call oc_build,$(PROJECT_PREFIX)ciip-2018-schema)
+	$(call oc_build,$(PROJECT_PREFIX)ciip-2018-extract)
 
 .PHONY: install
 install: whoami
-	$(call oc_promote,$(PROJECT_PREFIX)metabase)
+	$(call oc_promote,$(PROJECT_PREFIX)ciip-2018-schema)
+	$(call oc_promote,$(PROJECT_PREFIX)ciip-2018-extract)
