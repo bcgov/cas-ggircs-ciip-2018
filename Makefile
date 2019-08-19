@@ -140,3 +140,4 @@ build: whoami
 .PHONY: install
 install: whoami
 	$(call oc_promote,$(PROJECT_PREFIX)schema)
+	$(call oc_deploy)
