@@ -57,11 +57,11 @@ objects:
   metadata:
     annotations:
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${PREFIX}schema
+    name: ${PREFIX}ciip-2018-schema
   spec:
     replicas: 1
     selector:
-      name: ${PREFIX}schema
+      name: ${PREFIX}ciip-2018-schema
     strategy:
       type: Recreate
       recreateParams:
@@ -69,7 +69,7 @@ objects:
           failurePolicy: Retry
           execNewPod:
             <<: *envDefaults
-            containerName: ${PREFIX}schema
+            containerName: ${PREFIX}ciip-2018-schema
             command:
               - /usr/bin/env
               - bash
@@ -80,7 +80,7 @@ objects:
           failurePolicy: Retry
           execNewPod:
             <<: *envDefaults
-            containerName: ${PREFIX}schema
+            containerName: ${PREFIX}ciip-2018-schema
             command:
               - /usr/bin/env
               - bash
@@ -91,13 +91,13 @@ objects:
     template:
       metadata:
         labels:
-          name: ${PREFIX}schema
+          name: ${PREFIX}ciip-2018-schema
       spec:
         containers:
         - <<: *envDefaults
-          image: ${OC_REGISTRY}/${OC_PROJECT}/${PREFIX}schema:${GIT_SHA1}
+          image: ${OC_REGISTRY}/${OC_PROJECT}/${PREFIX}ciip-2018-schema:${GIT_SHA1}
           imagePullPolicy: IfNotPresent
-          name: ${PREFIX}schema
+          name: ${PREFIX}ciip-2018-schema
           resources:
             limits:
               cpu: 100m

@@ -20,7 +20,7 @@ objects:
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
-    name: ${PREFIX}schema
+    name: ${PREFIX}ciip-2018-schema
   spec:
     runPolicy: Parallel
     nodeSelector:
@@ -28,7 +28,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: ${PREFIX}schema:${GIT_SHA1}
+        name: ${PREFIX}ciip-2018-schema:${GIT_SHA1}
     resources:
       limits:
         cpu: "1"
@@ -39,13 +39,13 @@ objects:
     source:
       git:
         ref: ${GIT_SHA1}
-        uri: https://github.com/bcgov/${PREFIX}schema.git
+        uri: https://github.com/bcgov/${PREFIX}ciip-2018-schema.git
       type: Git
     strategy:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: cas-ggircs-perl:${PERL_VERSION}
+          name: ${PREFIX}perl:${PERL_VERSION}
       type: Source
     triggers: []
   status:
