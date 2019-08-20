@@ -13,6 +13,14 @@ parameters:
   displayName: Git SHA1
   name: GIT_SHA1
   required: true
+- description: Openshift project name
+  displayName: Project
+  name: OC_PROJECT
+  required: true
+- description: Openshift registry URL
+  displayName: Registry
+  name: OC_REGISTRY
+  required: true
 
 envDefaults: &envDefaults
   env:
@@ -87,7 +95,7 @@ objects:
       spec:
         containers:
         - <<: *envDefaults
-          image: ${PREFIX}schema:${GIT_SHA1}
+          image: ${OC_REGISTRY}/${OC_PROJECT}/${PREFIX}schema:${GIT_SHA1}
           imagePullPolicy: IfNotPresent
           name: ${PREFIX}schema
           resources:
@@ -103,4 +111,3 @@ objects:
           terminationMessagePath: /dev/termination-log
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-    triggers: []
