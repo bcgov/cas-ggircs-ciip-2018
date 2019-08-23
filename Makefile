@@ -1,3 +1,4 @@
+ifndef CI_NO_POSTGRES
 PERL=perl
 RSYNC=rsync
 PERL_VERSION=${shell ${PERL} -e 'print substr($$^V, 1)'}
@@ -15,13 +16,6 @@ PSQL_VERSION=${word 3,${shell ${PSQL} --version}}
 PG_SERVER_VERSION=${strip ${shell ${PSQL} -tc 'show server_version;' || echo error}}
 PG_MIN_VERSION=9.1
 PG_ROLE=${shell whoami}
-
-SHELL := /usr/bin/env bash
-PATHFINDER_PREFIX := wksv3k
-PROJECT_PREFIX := cas-ggircs-
-
-THIS_FILE := $(lastword $(MAKEFILE_LIST))
-include .pipeline/*.mk
 
 define check_file_in_path
 	${if ${shell which ${word 1,${1}}},
@@ -101,6 +95,17 @@ install_cpandeps:
 postinstall_check:
 	@@printf '%s\n%s\n' "${SQITCH_MIN_VERSION}" "${SQITCH_VERSION}" | sort -CV ||\
  	(echo "FATAL: ${SQITCH} version should be at least ${SQITCH_MIN_VERSION}. Make sure the ${SQITCH} executable installed by cpanminus is available has the highest priority in the PATH" && exit 1);
+endif
+
+ifndef CI_NO_PIPELINE
+SHELL := /usr/bin/env bash
+include .pipeline/oc.mk
+
+PATHFINDER_PREFIX := wksv3k
+PROJECT_PREFIX := cas-ggircs-
+
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
+PREVIOUS_DEPLOY_SHA1=$(shell $(OC) get job $(PROJECT_PREFIX)ciip-2018-schema --ignore-not-found -o go-template='{{index .metadata.labels "cas-pipeline/commit.id"}}')
 
 .PHONY: help
 help: $(call make_help,help,Explains how to use this Makefile)
@@ -140,4 +145,14 @@ build: whoami
 .PHONY: install
 install: whoami
 	$(call oc_promote,$(PROJECT_PREFIX)ciip-2018-schema)
-	$(call oc_deploy)
+	$(call oc_wait_for_deploy,$(PROJECT_PREFIX)postgres)
+	$(call oc_wait_for_job,$(PROJECT_PREFIX)etl)
+ifneq (,$(PREVIOUS_DEPLOY_SHA1))
+	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-revert,GIT_SHA1=$(PREVIOUS_DEPLOY_SHA1))
+endif
+	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema)
+
+.PHONY: install_test
+install_test: OC_PROJECT=$(OC_TEST_PROJECT)
+install_test: install
+endif
