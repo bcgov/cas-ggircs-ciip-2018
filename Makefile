@@ -105,7 +105,6 @@ PATHFINDER_PREFIX := wksv3k
 PROJECT_PREFIX := cas-ggircs-
 
 THIS_FILE := $(lastword $(MAKEFILE_LIST))
-PREVIOUS_DEPLOY_SHA1=$(shell $(OC) get job $(PROJECT_PREFIX)ciip-2018-schema --ignore-not-found -o go-template='{{index .metadata.labels "cas-pipeline/commit.id"}}')
 
 .PHONY: help
 help: $(call make_help,help,Explains how to use this Makefile)
@@ -144,15 +143,22 @@ build: whoami
 
 .PHONY: install
 install: whoami
+	$(eval PREVIOUS_DEPLOY_SHA1=$(shell $(OC) -n "$(OC_PROJECT)" get job $(PROJECT_PREFIX)ciip-2018-schema-deploy --ignore-not-found -o go-template='{{index .metadata.labels "cas-pipeline/commit.id"}}'))
 	$(call oc_promote,$(PROJECT_PREFIX)ciip-2018-schema)
-	$(call oc_wait_for_deploy,$(PROJECT_PREFIX)postgres)
-	$(call oc_wait_for_job,$(PROJECT_PREFIX)etl)
-ifneq (,$(PREVIOUS_DEPLOY_SHA1))
-	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-revert,GIT_SHA1=$(PREVIOUS_DEPLOY_SHA1))
-endif
-	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema)
+	$(call oc_wait_for_deploy,$(PROJECT_PREFIX)postgres-master)
+	$(call oc_wait_for_job,$(PROJECT_PREFIX)etl-deploy)
+	$(if $(PREVIOUS_DEPLOY_SHA1), $(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-revert,GIT_SHA1=$(PREVIOUS_DEPLOY_SHA1)))
+	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-deploy)
+
+.PHONY: install_dev
+install_dev: OC_PROJECT=$(OC_DEV_PROJECT)
+install_dev: install
 
 .PHONY: install_test
 install_test: OC_PROJECT=$(OC_TEST_PROJECT)
 install_test: install
+
+.PHONY: install_prod
+install_prod: OC_PROJECT=$(OC_PROD_PROJECT)
+install_prod: install
 endif
