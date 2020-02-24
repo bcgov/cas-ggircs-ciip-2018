@@ -23,7 +23,7 @@ create or replace view ciip_2018.compare_ciip_swrs_emission as
         from swrs.emission
         join swrs.facility on emission.facility_id = facility.id
         join swrs.report on emission.report_id = report.id
-        and report.reporting_period_duration = '2018'
+        and report.reporting_period_duration = 2018
         where emission.emission_category != 'BC_ScheduleB_WasteEmissions' and emission.emission_category != 'BC_ScheduleB_WastewaterEmissions'
         group by facility.swrs_facility_id, emission.emission_category, emission.gas_type
         union
@@ -33,7 +33,7 @@ create or replace view ciip_2018.compare_ciip_swrs_emission as
         from swrs.emission
         join swrs.facility on emission.facility_id = facility.id
         join swrs.report on emission.report_id = report.id
-        and report.reporting_period_duration = '2018'
+        and report.reporting_period_duration = 2018
         where emission.emission_category = 'BC_ScheduleB_WasteEmissions' or emission.emission_category = 'BC_ScheduleB_WastewaterEmissions'
         group by facility.swrs_facility_id, emission.gas_type
     )
@@ -59,5 +59,3 @@ create or replace view ciip_2018.compare_ciip_swrs_emission as
 
 
 commit;
-
-
