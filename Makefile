@@ -141,6 +141,10 @@ build: OC_PROJECT=$(OC_TOOLS_PROJECT)
 build: whoami
 	$(call oc_build,$(PROJECT_PREFIX)ciip-2018-schema)
 
+GGIRCS_DB_NAME = "ggircs"
+GGIRCS_USER_NAME = "ggircs"
+GGIRCS_READONLY_USER_NAME = $(GGIRCS_USER_NAME)_readonly
+
 .PHONY: install
 install: whoami
 	$(eval PREVIOUS_DEPLOY_SHA1=$(shell $(OC) -n "$(OC_PROJECT)" get job $(PROJECT_PREFIX)ciip-2018-schema-deploy --ignore-not-found -o go-template='{{index .metadata.labels "cas-pipeline/commit.id"}}'))
@@ -149,6 +153,10 @@ install: whoami
 	$(call oc_wait_for_job,$(PROJECT_PREFIX)etl-deploy)
 	$(if $(PREVIOUS_DEPLOY_SHA1), $(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-revert,GIT_SHA1=$(PREVIOUS_DEPLOY_SHA1)))
 	$(call oc_run_job,$(PROJECT_PREFIX)ciip-2018-schema-deploy)
+	# Retrieve password for the user with read-only access to the ggircs database
+	$(eval GGIRCS_READONLY_PASSWORD = $(shell $(OC) -n "$(OC_PROJECT)" get secret/cas-ggircs-postgres -o go-template='{{index .data "database-readonly-password"}}'))
+	# Update read-only user to give it access to the ciip_2018 schema
+	$(call oc_exec_all_pods,cas-postgres-master,create-user-db -u $(GGIRCS_READONLY_USER_NAME) -d $(GGIRCS_DB_NAME) -p $(GGIRCS_READONLY_PASSWORD) --enable-citus --schemas ciip_2018 --privileges select)
 
 .PHONY: install_dev
 install_dev: OC_PROJECT=$(OC_DEV_PROJECT)
